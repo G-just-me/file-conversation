@@ -1,0 +1,143 @@
+/* Base styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Drop area styles */
+.drop-area {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin: 20px 0;
+  transition: all 0.3s ease;
+}
+
+.drop-area.highlight {
+  border-color: #2196F3;
+  background-color: #f0f8ff;
+}
+
+/* File list styles */
+#fileList {
+  margin: 20px 0;
+}
+
+.file-item {
+  padding: 8px;
+  margin: 4px 0;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* Buttons */
+button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.file-label {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #2196F3;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.file-label:hover {
+  background-color: #1976D2;
+}
+
+
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background-color: #1a1a1a;
+  color: #f5f5f5;
+}
+
+.dark-mode .drop-area {
+  border-color: #444;
+  background-color: #2d2d2d;
+}
+
+.dark-mode .file-item {
+  background-color: #333;
+  color: #f5f5f5;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .drop-area {
+    padding: 15px;
+  }
+
+  button {
+    width: 100%;
+    margin: 5px 0;
+    padding: 12px;
+  }
+
+  .file-label {
+    width: 100%;
+    margin: 5px 0;
+    padding: 12px;
+  }
+
+
+  .theme-toggle {
+    bottom: 10px;
+    right: 10px;
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+
+  #fileList {
+    font-size: 0.9rem;
+  }
+
+  .file-item {
+    padding: 6px;
+  }
+}
+
+/* Tablet styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  body {
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  .drop-area {
+    padding: 18px;
+  }
+}
