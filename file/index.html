@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File Converter</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>File Converter</h1>
+
+  <div id="dropArea" class="drop-area">
+    <span>Drag & Drop files here</span>
+    <p>or</p>
+    <label for="fileInput" class="file-label">Choose files</label>
+    <input type="file" id="fileInput" multiple style="display: none;">
+    <div id="fileInputDisplay" class="file-input-display">No files chosen</div>
+  </div>
+
+  <select id="outputFormat">
+    <option value="jpg">JPG</option>
+    <option value="png">PNG</option>
+    <option value="webp">WEBP</option>
+    <option value="pdf">PDF</option>
+  </select>
+
+  <button id="convertButton">Convert</button>
+
+  <div id="fileList"></div>
+  <div id="output"></div>
+  
+  <button id="themeToggle" class="theme-toggle">Dark Mode</button>
+
+  <script>
+    // theme
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark-mode') {
+      body.classList.add('dark-mode');
+      themeToggle.textContent = 'Light Mode';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-mode');
+      const isDark = body.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark-mode' : '');
+      themeToggle.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+    });
+
+    // File convert function
+    const fileInput = document.getElementById('fileInput');
+    const fileInputDisplay = document.getElementById('fileInputDisplay');
+    const formatSelect = document.getElementById('outputFormat');
+    const convertButton = document.getElementById('convertButton');
+    const outputDiv = document.getElementById('output');
+    const dropArea = document.getElementById('dropArea');
+    let filesArray = [];
+
+    // way to input
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // Highlight drop area
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
+    });
+
+    // Handle dropped files
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const newFiles = dt.files;
+      
+      if (newFiles.length > 0) {
+        // Create a new DataTransfer
+        const dataTransfer = new DataTransfer();
+        
+        // Add existing files
+        filesArray.forEach(file => dataTransfer.items.add(file));
+        
+        // Add new files
+        Array.from(newFiles).forEach(file => dataTransfer.items.add(file));
+        
+        // Update the file input with combined files
+        fileInput.files = dataTransfer.files;
+        updateFileList(dataTransfer.files);
+      }
+    }
+
+    function updateFileList(files) {
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '<h3>Selected Files:</h3>';
+      filesArray = Array.from(files);
+      
+      filesArray.forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        
+        const fileName = document.createElement('span');
+        fileName.textContent = `${file.name} (${(file.size/1024).toFixed(2)} KB)`;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = '×';
+        removeBtn.addEventListener('click', () => removeFile(index));
+        
+        fileItem.appendChild(fileName);
+        fileItem.appendChild(removeBtn);
+        fileList.appendChild(fileItem);
+      });
+    }
+
+    function removeFile(index) {
+      filesArray.splice(index, 1);
+      updateFileList(filesArray);
+    }
+
+    fileInput.addEventListener('change', (e) => {
+      const newFiles = e.target.files;
+      if (newFiles.length > 0) {
+        // Create a new DataTransfer to combine existing and new files
+        const dataTransfer = new DataTransfer();
+        
+        // Add existing files
+        filesArray.forEach(file => dataTransfer.items.add(file));
+        
+        // Add new files
+        Array.from(newFiles).forEach(file => dataTransfer.items.add(file));
+        
+        // Update the file input with combined files
+        fileInput.files = dataTransfer.files;
+        fileInputDisplay.textContent = `${dataTransfer.files.length} file(s) selected`;
+        updateFileList(dataTransfer.files);
+      }
+    });
+
+    convertButton.addEventListener('click', async () => {
+      if (filesArray.length === 0) {
+        outputDiv.textContent = 'Please select at least one file first.';
+        return;
+      }
+
+      outputDiv.textContent = 'Starting conversion...';
+      console.log('Starting conversion of', filesArray.length, 'files');
+
+      try {
+        const convertPromises = filesArray.map(file => new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          console.log('Processing file:', file.name);
+
+          reader.onload = function(e) {
+            try {
+              console.log('File loaded:', file.name);
+              const arrayBuffer = e.target.result;
+              const blob = new Blob([arrayBuffer], {type: file.type});
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              // Add format extension to downloaded file
+              const format = formatSelect.value;
+              a.download = `${file.name.split('.').slice(0, -1).join('.')}.${format}`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              console.log('File converted successfully:', file.name);
+              resolve();
+            } catch (error) {
+              console.error('Conversion error:', error);
+              reject(`Error converting ${file.name}: ${error.message}`);
+            }
+          };
+          
+          reader.onerror = function() {
+            console.error('File read error:', file.name);
+            reject(`Error reading ${file.name}`);
+          };
+          
+          reader.readAsArrayBuffer(file);
+        }));
+
+        Promise.all(convertPromises)
+          .then(() => {
+            const successMessage = `All ${filesArray.length} files converted successfully! Total size: ${(filesArray.reduce((sum, f) => sum + f.size, 0)/1024).toFixed(2)} KB`;
+            console.log(successMessage);
+            outputDiv.textContent = successMessage;
+          })
+          .catch((error) => {
+            console.error('Conversion error:', error);
+            outputDiv.textContent = error;
+          });
+
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        outputDiv.textContent = 'Conversion failed: ' + error.message;
+      }
+    });
+
+  </script>
+</body>
+</html>
