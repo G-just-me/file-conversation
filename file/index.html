@@ -47,7 +47,7 @@
       themeToggle.textContent = isDark ? 'Light Mode' : 'Dark Mode';
     });
 
-    // File convert function
+    //  convert function
     const fileInput = document.getElementById('fileInput');
     const fileInputDisplay = document.getElementById('fileInputDisplay');
     const formatSelect = document.getElementById('outputFormat');
@@ -92,7 +92,7 @@
         // Add new files
         Array.from(newFiles).forEach(file => dataTransfer.items.add(file));
         
-        // Update the file input with combined files
+        // Update the file input 
         fileInput.files = dataTransfer.files;
         updateFileList(dataTransfer.files);
       }
@@ -129,7 +129,7 @@
     fileInput.addEventListener('change', (e) => {
       const newFiles = e.target.files;
       if (newFiles.length > 0) {
-        // Create a new DataTransfer to combine existing and new files
+        // Create a new DataTransfer 
         const dataTransfer = new DataTransfer();
         
         // Add existing files
@@ -138,7 +138,7 @@
         // Add new files
         Array.from(newFiles).forEach(file => dataTransfer.items.add(file));
         
-        // Update the file input with combined files
+        // Update the file input
         fileInput.files = dataTransfer.files;
         fileInputDisplay.textContent = `${dataTransfer.files.length} file(s) selected`;
         updateFileList(dataTransfer.files);
@@ -167,7 +167,7 @@
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
               a.href = url;
-              // Add format extension to downloaded file
+              // Add format extension to download file
               const format = formatSelect.value;
               a.download = `${file.name.split('.').slice(0, -1).join('.')}.${format}`;
               document.body.appendChild(a);
@@ -210,3 +210,4 @@
   </script>
 </body>
 </html>
+
